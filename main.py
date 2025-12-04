@@ -1,14 +1,12 @@
-import nltk
-nltk.download('punkt')
-nltk.download('stopwords')
-
+import requests
+import json
 import re
+import random
 
-RESPUESTAS = {
-    "saludo": ["Hola 😄 ¿en qué puedo ayudarte?", "¡Hola! ¿Qué quieres aprender hoy?"],
-    "despedida": ["Adiós 👋", "Hasta luego, ¡que tengas un buen día!"],
-    "gracias": ["De nada 😊", "Con gusto."],
-}
+URL_RESPUESTAS = "https://raw.githubusercontent.com/usuario/repositorio/main/respuestas.json"
+
+# descargar respuestas
+RESPUESTAS = requests.get(URL_RESPUESTAS).json()
 
 PATRONES = {
     "saludo": [r"\b(hola|buenas|buenas tardes|buenos días)\b"],
@@ -26,11 +24,9 @@ def detectar_intent(texto):
 
 def responder(texto):
     intent = detectar_intent(texto)
-    if intent:
-        # selecciona una respuesta aleatoria entre las definidas
-        import random
+    if intent and intent in RESPUESTAS:
         return random.choice(RESPUESTAS[intent])
-    return "Lo siento, no entiendo. ¿Puedes reformular?"
+    return "No entiendo, ¿puedes reformular?"
 
 if __name__ == "__main__":
     while True:

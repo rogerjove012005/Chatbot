@@ -1,0 +1,5 @@
+{
+    "saludo": ["Hola 😄 ¿en qué puedo ayudarte?", "¡Hola! ¿Qué quieres aprender hoy?"],
+    "despedida": ["Adiós 👋", "Hasta luego, ¡que tengas un buen día!"],
+    "gracias": ["De nada 😊", "Con gusto."]
+}

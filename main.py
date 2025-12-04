@@ -1,13 +1,10 @@
-import requests
-import json
-import re
+import sqlite3
 import random
+import re
 
-URL_RESPUESTAS = "https://raw.githubusercontent.com/usuario/repositorio/main/respuestas.json"
+DB_PATH = "db/respuestas.db"
 
-# descargar respuestas
-RESPUESTAS = requests.get(URL_RESPUESTAS).json()
-
+# Patrones para detectar las intenciones
 PATRONES = {
     "saludo": [r"\b(hola|buenas|buenas tardes|buenos días)\b"],
     "despedida": [r"\b(adiós|chao|hasta luego|nos vemos)\b"],
@@ -22,16 +19,33 @@ def detectar_intent(texto):
                 return intent
     return None
 
+def obtener_respuesta(intent):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute("SELECT respuesta FROM respuestas WHERE intent = ?", (intent,))
+    filas = cur.fetchall()
+    con.close()
+    
+    if filas:
+        return random.choice([f[0] for f in filas])
+    return None
+
 def responder(texto):
     intent = detectar_intent(texto)
-    if intent and intent in RESPUESTAS:
-        return random.choice(RESPUESTAS[intent])
-    return "No entiendo, ¿puedes reformular?"
+    if intent:
+        resp = obtener_respuesta(intent)
+        if resp:
+            return resp
+    
+    # Si no hay coincidencia, respuesta genérica
+    return "No estoy seguro de cómo responder a eso, pero puedo ayudarte con saludos, despedidas o agradecimientos."
 
 if __name__ == "__main__":
+    print("Chatbot con SQLite iniciado. Escribe 'salir' para terminar.")
     while True:
         entrada = input("Tú: ")
         if entrada.strip().lower() in ("salir", "exit", "quit"):
             print("Bot: ¡Adiós!")
             break
+
         print("Bot:", responder(entrada))
